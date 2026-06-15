@@ -11,9 +11,7 @@ import org.springframework.messaging.MessageChannel;
 public class IntegrationConfig {
 
     @Bean("inputChannel")
-    public MessageChannel inputChannel() {
-        return new DirectChannel();
-    }
+    public MessageChannel inputChannel() { return new DirectChannel(); }
 
     @Bean("outputChannel")
     public MessageChannel outputChannel() {
@@ -27,6 +25,11 @@ public class IntegrationConfig {
 
     @Bean("errorChannel")
     public MessageChannel errorChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean("routerChannel")
+    public MessageChannel routerChannel() {
         return new DirectChannel();
     }
 }

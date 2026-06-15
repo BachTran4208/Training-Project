@@ -20,9 +20,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskMapper taskMapper;
 
     @Override
-    @ServiceActivator(
-            inputChannel = "CREATE_TASK_CHANNEL",
-            outputChannel = "outputChannel")
+    @ServiceActivator(inputChannel = "CREATE_TASK_CHANNEL")
     public TaskResponse createTask(CreateTaskRequest request) {
         Task task = new Task();
 

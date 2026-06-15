@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaskRouter {
 
-    @Router
+    @Router(inputChannel = "routerChannel")
     public String route(Message<?> message) {
 
         String action = (String) message.getHeaders().get("action");

@@ -1,0 +1,18 @@
+package project.training.com.example.demo.config.flow;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.dsl.IntegrationFlow;
+
+@Configuration
+public class Flow {
+
+    @Bean
+    public IntegrationFlow mainFlow() {
+        return IntegrationFlow.from("inputChannel")
+                .log(message -> "INPUT: " + message.getPayload())
+                .channel("routerChannel")
+                .get();
+    }
+}
+

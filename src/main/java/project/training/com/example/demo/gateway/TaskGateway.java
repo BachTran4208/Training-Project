@@ -11,7 +11,6 @@ public interface TaskGateway {
 
     @Gateway(
             requestChannel = "inputChannel",
-            replyChannel = "outputChannel",
             headers = @GatewayHeader(
                     name = "action",
                     value = "CREATE_TASK"
