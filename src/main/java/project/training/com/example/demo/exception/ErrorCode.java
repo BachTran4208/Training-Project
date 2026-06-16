@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ErrorCode {
 
-    INTERNAL_SERVER_ERROR(9999, "Internal server error");
+    INTERNAL_SERVER_ERROR(500, "Internal server error");
 
     private final int code;
     private final String message;

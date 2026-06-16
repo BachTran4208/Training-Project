@@ -19,7 +19,7 @@ public class IntegrationConfig {
     }
 
     @Bean("CREATE_TASK_CHANNEL")
-    public MessageChannel createUserChannel() {
+    public MessageChannel createTaskChannel() {
         return new DirectChannel();
     }
 

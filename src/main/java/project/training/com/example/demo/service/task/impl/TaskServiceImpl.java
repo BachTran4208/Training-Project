@@ -1,4 +1,4 @@
-package project.training.com.example.demo.service.task;
+package project.training.com.example.demo.service.task.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -6,11 +6,10 @@ import org.springframework.stereotype.Service;
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.entity.Task;
-import project.training.com.example.demo.entity.TaskStatus;
 import project.training.com.example.demo.mapper.TaskMapper;
 import project.training.com.example.demo.repository.TaskRepository;
+import project.training.com.example.demo.service.task.TaskService;
 
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -22,29 +21,16 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @ServiceActivator(inputChannel = "CREATE_TASK_CHANNEL")
     public TaskResponse createTask(CreateTaskRequest request) {
-        Task task = new Task();
 
-        task.setTitle(request.getTitle());
-        task.setPoint(request.getPoint());
-        task.setEstimateTime(request.getEstimateTime());
-
-        task.setStatus(TaskStatus.IN_QUEUE);
-        task.setAssignee(
-                request.getAssignee() != null ? request.getAssignee() : "Undefined"
-        );
-
-        task.setDateCreated(LocalDate.now());
-
-        task.setActualTime(0);
-        task.setRemainingTime(
-                request.getEstimateTime() != null ? request.getEstimateTime() : 0
-        );
-
-        // deadline = undefined when create
-        task.setDeadline(null);
-
+        if (request == null) {
+            throw new IllegalArgumentException("CreateTaskRequest must not be null");
+        }
+        
+        Task task = taskMapper.toEntity(request);
+        
         // save DB
         Task saved = taskRepository.save(task);
+        
         return taskMapper.toResponse(saved);
     }
 }
