@@ -2,6 +2,7 @@ package project.training.com.example.demo.dto.task;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import project.training.com.example.demo.validation.annotation.ValidPoint;
 
 @Data
 public class CreateTaskRequest {
@@ -14,8 +15,7 @@ public class CreateTaskRequest {
     private String assignee;
 
     @NotNull(message = "Point is required")
-    @Min(value = 1, message = "Point must be >= 1")
-    @Max(value = 8, message = "Point must be <= 8")
+    @ValidPoint(message = "Point must be one of: 1, 2, 3, 5, 8")
     private Integer point;
 
     @Min(value = 0, message = "Estimate time must be >= 0")

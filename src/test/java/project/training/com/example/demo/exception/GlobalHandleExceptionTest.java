@@ -89,33 +89,22 @@ public class GlobalHandleExceptionTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.point").value("Point is required"));
+                .andExpect(jsonPath("$.errors.point").value("Point must be one of: 1, 2, 3, 5, 8"));
     }
 
     @Test
-    void shouldFail_whenPointLessThan1() throws Exception {
+    void shouldFail_whenPointNotInAllowedList() throws Exception {
 
         CreateTaskRequest request = new CreateTaskRequest();
         request.setTitle("Valid title");
-        request.setPoint(0);
+        request.setPoint(4);
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(jsonPath("$.errors.point").value("Point must be >= 1"));
-    }
-
-    @Test
-    void shouldFail_whenPointGreaterThan8() throws Exception {
-
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("Valid title");
-        request.setPoint(9);
-
-        mockMvc.perform(post("/task")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(jsonPath("$.errors.point").value("Point must be <= 8"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.point")
+                        .value("Point must be one of: 1, 2, 3, 5, 8"));
     }
 
     @Test

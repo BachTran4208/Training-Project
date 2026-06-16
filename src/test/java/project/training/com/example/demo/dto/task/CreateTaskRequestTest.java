@@ -1,12 +1,13 @@
 package project.training.com.example.demo.dto.task;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -23,128 +24,103 @@ public class CreateTaskRequestTest {
         validator = factory.getValidator();
     }
 
-    @Test
-    void shouldPassValidation_WhenRequestIsValid() {
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("Implement Login API");
-        request.setAssignee("John");
-        request.setPoint(5);
-        request.setEstimateTime(10);
+	static class TestCase {
+		String name;
+		CreateTaskRequest request;
+		String expectedMessage;
 
-        Set<ConstraintViolation<CreateTaskRequest>> violations =
-                validator.validate(request);
+		TestCase(String name, CreateTaskRequest request, String expectedMessage) {
+			this.name = name;
+			this.request = request;
+			this.expectedMessage = expectedMessage;
+		}
+	}
 
-        assertTrue(violations.isEmpty());
-    }
+	static Stream<TestCase> invalidCases() {
+		return Stream.of(
 
-    @Test
-    void shouldFail_WhenTitleIsBlank() {
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("");
-        request.setPoint(5);
+			// ===== TITLE =====
+            new TestCase(
+                    "blank title",
+                    new CreateTaskRequest() {{
+                        setTitle("");
+                        setPoint(5);
+                        setEstimateTime(10);
+                        setAssignee("John");
+                    }},
+                    "Title is required"
+            ),
 
-        Set<ConstraintViolation<CreateTaskRequest>> violations =
-                validator.validate(request);
+            new TestCase(
+                    "title exceeds 100 characters",
+                    new CreateTaskRequest() {{
+                        setTitle("a".repeat(101));
+                        setPoint(5);
+                        setEstimateTime(10);
+                        setAssignee("John");
+                    }},
+                    "Title must be <= 100 characters"
+            ),
 
-        assertEquals(1, violations.size());
-        assertEquals("Title is required",
-                violations.iterator().next().getMessage());
-    }
+            // ===== POINT =====
+            new TestCase(
+                    "point null",
+                    new CreateTaskRequest() {{
+                        setTitle("Task");
+                        setEstimateTime(10);
+                        setAssignee("John");
+                    }},
+                    "Point must be one of: 1, 2, 3, 5, 8"
+            ),
 
-    @Test
-    void shouldFail_WhenTitleExceeds100Characters() {
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("a".repeat(101));
-        request.setPoint(5);
 
-        Set<ConstraintViolation<CreateTaskRequest>> violations =
-                validator.validate(request);
+            new TestCase(
+                    "point not in allowed set",
+                    new CreateTaskRequest() {{
+                        setTitle("Task");
+                        setPoint(9);
+                        setEstimateTime(10);
+                        setAssignee("John");
+                    }},
+                    "Point must be one of: 1, 2, 3, 5, 8"
+            ),
 
-        assertTrue(
-                violations.stream()
-                        .anyMatch(v -> v.getMessage()
-                                .equals("Title must be <= 100 characters"))
-        );
-    }
+            // ===== ESTIMATE TIME =====
+            new TestCase(
+                    "negative estimate time",
+                    new CreateTaskRequest() {{
+                        setTitle("Task");
+                        setPoint(5);
+                        setEstimateTime(-1);
+                        setAssignee("John");
+                    }},
+                    "Estimate time must be >= 0"
+            ),
 
-    @Test
-    void shouldFail_WhenPointIsNull() {
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("Task");
+            // ===== ASSIGNEE =====
+            new TestCase(
+                    "assignee too long",
+                    new CreateTaskRequest() {{
+                        setTitle("Task");
+                        setPoint(5);
+                        setEstimateTime(10);
+                        setAssignee("a".repeat(51));
+                    }},
+                    "Assignee name too long"
+            )
+		);
+	}
 
-        Set<ConstraintViolation<CreateTaskRequest>> violations =
-                validator.validate(request);
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("invalidCases")
+	void shouldFailValidation(TestCase tc) {
+		Set<ConstraintViolation<CreateTaskRequest>> violations =
+				validator.validate(tc.request);
 
-        assertTrue(
-                violations.stream()
-                        .anyMatch(v -> v.getMessage()
-                                .equals("Point is required"))
-        );
-    }
+		assertTrue(
+				violations.stream()
+						.anyMatch(v -> v.getMessage().equals(tc.expectedMessage))
+		);
+	}
 
-    @Test
-    void shouldFail_WhenPointLessThan1() {
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("Task");
-        request.setPoint(0);
-
-        Set<ConstraintViolation<CreateTaskRequest>> violations =
-                validator.validate(request);
-
-        assertTrue(
-                violations.stream()
-                        .anyMatch(v -> v.getMessage()
-                                .equals("Point must be >= 1"))
-        );
-    }
-
-    @Test
-    void shouldFail_WhenPointGreaterThan8() {
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("Task");
-        request.setPoint(9);
-
-        Set<ConstraintViolation<CreateTaskRequest>> violations =
-                validator.validate(request);
-
-        assertTrue(
-                violations.stream()
-                        .anyMatch(v -> v.getMessage()
-                                .equals("Point must be <= 8"))
-        );
-    }
-
-    @Test
-    void shouldFail_WhenEstimateTimeIsNegative() {
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("Task");
-        request.setPoint(5);
-        request.setEstimateTime(-1);
-
-        Set<ConstraintViolation<CreateTaskRequest>> violations =
-                validator.validate(request);
-
-        assertTrue(
-                violations.stream()
-                        .anyMatch(v -> v.getMessage()
-                                .equals("Estimate time must be >= 0"))
-        );
-    }
-
-    @Test
-    void shouldFail_WhenAssigneeTooLong() {
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTitle("Task");
-        request.setPoint(5);
-        request.setAssignee("a".repeat(51));
-
-        Set<ConstraintViolation<CreateTaskRequest>> violations =
-                validator.validate(request);
-
-        assertTrue(
-                violations.stream()
-                        .anyMatch(v -> v.getMessage()
-                                .equals("Assignee name too long"))
-        );
-    }
 }
