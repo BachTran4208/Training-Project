@@ -1,6 +1,8 @@
 package project.training.com.example.demo.mapper;
 
 import org.junit.jupiter.api.Test;
+
+import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.entity.Task;
 import project.training.com.example.demo.entity.TaskStatus;
@@ -51,6 +53,54 @@ public class TaskMapperTest {
         assertEquals(10, response.getEstimateTime());
         assertEquals(2, response.getActualTime());
         assertEquals(8, response.getRemainingTime());
+    }
+
+    @Test
+    void toEntity_shouldMapCorrectly() {
+
+        CreateTaskRequest request = new CreateTaskRequest();
+        request.setTitle("Test task");
+        request.setPoint(5);
+        request.setEstimateTime(10);
+        request.setAssignee("John");
+
+        Task task = taskMapper.toEntity(request);
+
+        assertNotNull(task);
+        assertEquals("Test task", task.getTitle());
+        assertEquals(5, task.getPoint());
+        assertEquals(10, task.getEstimateTime());
+        assertEquals("John", task.getAssignee());
+
+        assertEquals(TaskStatus.IN_QUEUE, task.getStatus());
+        assertEquals(10, task.getRemainingTime());
+        assertEquals(0, task.getActualTime());
+        assertNull(task.getDeadline());
+        assertNotNull(task.getDateCreated());
+    }
+
+    @Test
+    void toEntity_shouldHandleNullFields() {
+
+        CreateTaskRequest request = new CreateTaskRequest();
+        request.setTitle("Test");
+        request.setEstimateTime(null);
+        request.setAssignee(null);
+
+        Task task = taskMapper.toEntity(request);
+
+        assertEquals("Undefined", task.getAssignee());
+        assertEquals(0, task.getRemainingTime());
+    }
+
+    @Test
+    void toEntity_shouldReturnNull_whenRequestIsNull() {
+
+        // when
+        Task task = taskMapper.toEntity(null);
+
+        // then
+        assertNull(task);
     }
 
 }

@@ -170,7 +170,7 @@ public class GlobalHandleExceptionTest {
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         verify(taskGateway).createTask(any());
     }

@@ -1,9 +1,9 @@
 package project.training.com.example.demo.service.task;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
@@ -12,10 +12,12 @@ import project.training.com.example.demo.entity.Task;
 import project.training.com.example.demo.entity.TaskStatus;
 import project.training.com.example.demo.mapper.TaskMapper;
 import project.training.com.example.demo.repository.TaskRepository;
+import project.training.com.example.demo.service.task.impl.TaskServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,14 +26,19 @@ class TaskServiceImplTest {
     @Mock
     private TaskRepository taskRepository;
 
-    @Mock
-    private TaskMapper taskMapper;
+    private TaskMapper taskMapper = new TaskMapper();
 
-    @InjectMocks
     private TaskServiceImpl taskService;
+
+
+    @BeforeEach
+    void setUp() {
+        taskService = new TaskServiceImpl(taskRepository, taskMapper);
+    }
 
     @Test
     void createTask_shouldSaveAndReturnResponse() {
+
         // given
         CreateTaskRequest request = new CreateTaskRequest();
         request.setTitle("Test task");
@@ -40,12 +47,13 @@ class TaskServiceImplTest {
         request.setAssignee("John");
 
         Task savedTask = new Task();
+        savedTask.setId(1L);
         savedTask.setTitle("Test task");
-
-        TaskResponse response = new TaskResponse();
+        savedTask.setPoint(5);
+        savedTask.setEstimateTime(10);
+        savedTask.setAssignee("John");
 
         when(taskRepository.save(any(Task.class))).thenReturn(savedTask);
-        when(taskMapper.toResponse(savedTask)).thenReturn(response);
 
         // when
         TaskResponse result = taskService.createTask(request);
@@ -68,7 +76,6 @@ class TaskServiceImplTest {
         assertNotNull(captured.getDateCreated());
         assertNull(captured.getDeadline());
 
-        verify(taskMapper).toResponse(savedTask);
     }
 
     @Test
@@ -81,15 +88,15 @@ class TaskServiceImplTest {
         request.setAssignee(null);
 
         Task savedTask = new Task();
-        TaskResponse response = new TaskResponse();
 
         when(taskRepository.save(any(Task.class))).thenReturn(savedTask);
-        when(taskMapper.toResponse(savedTask)).thenReturn(response);
-
+    
         // when
-        taskService.createTask(request);
+        TaskResponse result = taskService.createTask(request);
 
         // then
+        assertNotNull(result);
+
         ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
         verify(taskRepository).save(captor.capture());
 
@@ -97,5 +104,19 @@ class TaskServiceImplTest {
 
         assertEquals("Undefined", task.getAssignee());
         assertEquals(0, task.getRemainingTime());
+    }
+
+    @Test
+    void createTask_shouldThrowException_whenRequestIsNull() {
+
+        // when + then
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> taskService.createTask(null)
+        );
+
+        assertEquals("CreateTaskRequest must not be null", ex.getMessage());
+
+        verifyNoInteractions(taskRepository);
     }
 }
