@@ -10,6 +10,8 @@ import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.entity.Task;
 import project.training.com.example.demo.entity.TaskStatus;
+import project.training.com.example.demo.exception.AppException;
+import project.training.com.example.demo.exception.ErrorCode;
 import project.training.com.example.demo.mapper.TaskMapper;
 import project.training.com.example.demo.repository.TaskRepository;
 import project.training.com.example.demo.service.task.impl.TaskServiceImpl;
@@ -19,6 +21,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class TaskServiceImplTest {
@@ -118,5 +122,56 @@ class TaskServiceImplTest {
         assertEquals("CreateTaskRequest must not be null", ex.getMessage());
 
         verifyNoInteractions(taskRepository);
+    }
+
+    @Test
+    void getTask_shouldReturnTaskResponse_whenTaskExists() {
+
+        // given
+        Long taskId = 1L;
+
+        Task task = new Task();
+        task.setId(taskId);
+        task.setTitle("Test task");
+        task.setPoint(5);
+        task.setEstimateTime(10);
+        task.setAssignee("John");
+        task.setStatus(TaskStatus.IN_QUEUE);
+
+        when(taskRepository.findById(taskId))
+                .thenReturn(Optional.of(task));
+
+        // when
+        TaskResponse result = taskService.getTask(taskId);
+
+        // then
+        assertNotNull(result);
+        assertEquals(taskId, result.getId());
+        assertEquals("Test task", result.getTitle());
+        assertEquals(5, result.getPoint());
+        assertEquals(10, result.getEstimateTime());
+        assertEquals("John", result.getAssignee());
+
+        verify(taskRepository).findById(taskId);
+    }
+
+    @Test
+    void getTask_shouldThrowException_whenTaskNotFound() {
+
+        // given
+        Long taskId = 999L;
+
+        when(taskRepository.findById(taskId))
+                .thenReturn(Optional.empty());
+
+        // when + then
+        AppException ex = assertThrows(
+                AppException.class,
+                () -> taskService.getTask(taskId)
+        );
+
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, ex.getErrorCode());
+
+        verify(taskRepository).findById(taskId);
     }
 }

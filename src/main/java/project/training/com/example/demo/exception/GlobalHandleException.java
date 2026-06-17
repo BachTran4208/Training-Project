@@ -1,5 +1,6 @@
 package project.training.com.example.demo.exception;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +34,10 @@ public class GlobalHandleException {
             (RequestObject<?>) ex.getBindingResult()
                     .getTarget();
 
-        ResponseObject response = ResponseObject.builder()
+        ResponseObject<Map<String, String>> response = ResponseObject.<Map<String, String>>builder()
             .message("Validation failed")
             .status(HttpStatus.BAD_REQUEST.value())
-            .transactionId(requestObject.getTransactionId() != null ? requestObject.getTransactionId() : null)
+            .transactionId(requestObject != null ? requestObject.getTransactionId() : null)
             .serviceName(serviceName)
             .data(errors)
             .build();
@@ -47,9 +48,12 @@ public class GlobalHandleException {
     @ExceptionHandler(AppException.class)
     public ResponseEntity<?> handleAppException(AppException ex) {
 
-        ResponseObject response = ResponseObject.builder()
-            .message(ex.getMessage())
+        String transactionId = MDC.get("transactionId");
+
+        ResponseObject<String> response = ResponseObject.<String>builder()
+            .message(ex.getErrorCode().getMessage())
             .status(ex.getErrorCode().getCode())
+            .transactionId(transactionId)
             .serviceName(serviceName)
             .data(ex.getCause() != null ? ex.getCause().getMessage() : null)
             .build();
@@ -61,9 +65,12 @@ public class GlobalHandleException {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleUnexpectedException(Exception ex) {
 
-        ResponseObject response = ResponseObject.builder()
+        String transactionId = MDC.get("transactionId");
+
+        ResponseObject<String> response = ResponseObject.<String>builder()
             .message("An unexpected error occurred")
             .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .transactionId(transactionId)
             .serviceName(serviceName)
             .data(ex.getMessage())
             .build();

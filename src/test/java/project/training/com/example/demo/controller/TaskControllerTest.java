@@ -15,6 +15,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,5 +76,44 @@ class TaskControllerTest {
                     .value("Test task"));
 
         verify(taskGateway, times(1)).createTask(any(CreateTaskRequest.class));
+    }
+
+    @Test
+    void getTask_success() throws Exception {
+
+        // given
+        Long taskId = 1L;
+
+        RequestObject<Void> requestObject =
+                RequestObject.<Void>builder()
+                        .transactionId("txn-456")
+                        .serviceName("demo")
+                        .build();
+
+        TaskResponse response = new TaskResponse();
+        response.setId(taskId);
+        response.setTitle("Test task");
+
+        when(taskGateway.getTask(taskId)).thenReturn(response);
+
+        // when + then
+        mockMvc.perform(get("/task/{taskId}", taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestObject)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message")
+                        .value("Task found"))
+                .andExpect(jsonPath("$.status")
+                        .value(200))
+                .andExpect(jsonPath("$.transactionId")
+                        .value("txn-456"))
+                .andExpect(jsonPath("$.serviceName")
+                        .value("demo"))
+                .andExpect(jsonPath("$.data.id")
+                        .value(1))
+                .andExpect(jsonPath("$.data.title")
+                        .value("Test task"));
+
+        verify(taskGateway, times(1)).getTask(taskId);
     }
 }

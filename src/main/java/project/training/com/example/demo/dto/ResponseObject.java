@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class ResponseObject {
+public class ResponseObject<T> {
     @JsonProperty("message")
     private String message;
 
@@ -22,5 +22,5 @@ public class ResponseObject {
     private String serviceName;
 
     @JsonProperty("data")
-    private Object data;
+    private T data;
 }

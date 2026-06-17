@@ -3,6 +3,7 @@ package project.training.com.example.demo.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,14 +31,16 @@ public class TaskController {
     private final TaskGateway taskGateway;
 
     @PostMapping
-    public ResponseEntity<ResponseObject> create(@Valid @RequestBody RequestObject<CreateTaskRequest> requestObject) {
+    public ResponseEntity<ResponseObject<TaskResponse>> create(@Valid @RequestBody RequestObject<CreateTaskRequest> requestObject) {
 
+        MDC.put("transactionId", requestObject.getTransactionId());
+        
         CreateTaskRequest createTaskRequest = requestObject.getData();
 
         TaskResponse task = taskGateway.createTask(createTaskRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseObject.builder()
+                .body(ResponseObject.<TaskResponse>builder()
                         .message("Create task successfully")
                         .status(HttpStatus.CREATED.value())
                         .transactionId(requestObject.getTransactionId())
@@ -47,12 +50,14 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<ResponseObject> get(@Valid @PathVariable Long taskId, @Valid RequestObject<Void> requestObject) {
+    public ResponseEntity<ResponseObject<TaskResponse>> get(@Valid @PathVariable Long taskId, @Valid @RequestBody RequestObject<Void> requestObject) {
+
+        MDC.put("transactionId", requestObject.getTransactionId());
 
         TaskResponse task = taskGateway.getTask(taskId);
         
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseObject.builder()
+                .body(ResponseObject.<TaskResponse>builder()
                         .message("Task found")
                         .status(HttpStatus.OK.value())
                         .transactionId(requestObject.getTransactionId())

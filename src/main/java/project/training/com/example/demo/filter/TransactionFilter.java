@@ -2,6 +2,7 @@ package project.training.com.example.demo.filter;
 
 import java.io.IOException;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,7 +24,14 @@ public class TransactionFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        try {
 
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+
+        } finally {
+
+            MDC.clear();
+
+        }
     }
 }
