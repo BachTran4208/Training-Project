@@ -3,6 +3,7 @@ package project.training.com.example.demo.gateway;
 import org.springframework.integration.annotation.Gateway;
 import org.springframework.integration.annotation.GatewayHeader;
 import org.springframework.integration.annotation.MessagingGateway;
+
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 
@@ -17,4 +18,13 @@ public interface TaskGateway {
             )
     )
     TaskResponse createTask(CreateTaskRequest request);
+
+	@Gateway(
+			requestChannel = "inputChannel",
+			headers = @GatewayHeader(
+					name = "action",
+					value = "GET_TASK"
+			)
+	)
+    TaskResponse getTask(Long taskId);
 }

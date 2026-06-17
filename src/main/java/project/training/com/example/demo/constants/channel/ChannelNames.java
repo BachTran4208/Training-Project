@@ -9,5 +9,6 @@ public class ChannelNames {
     public static final String ROUTER_CHANNEL = "routerChannel";
 
     public static final String CREATE_TASK_CHANNEL = "CREATE_TASK_CHANNEL";
+    public static final String GET_TASK_CHANNEL = "GET_TASK_CHANNEL";
     
 }

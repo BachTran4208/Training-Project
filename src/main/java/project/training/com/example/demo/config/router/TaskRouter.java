@@ -24,6 +24,8 @@ public class TaskRouter {
         return switch (action) {
             case TaskActions.CREATE_TASK ->
                     ChannelNames.CREATE_TASK_CHANNEL;
+            case TaskActions.GET_TASK ->
+                    ChannelNames.GET_TASK_CHANNEL;
             default ->
                     ChannelNames.ERROR_CHANNEL;
         };

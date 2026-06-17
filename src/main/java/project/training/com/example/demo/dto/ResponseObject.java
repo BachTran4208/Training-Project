@@ -14,7 +14,13 @@ public class ResponseObject {
 
     @JsonProperty("status")
     private int status;
-    
+
+    @JsonProperty("transactionId")
+    private String transactionId;
+
+    @JsonProperty("serviceName")
+    private String serviceName;
+
     @JsonProperty("data")
     private Object data;
 }

@@ -23,17 +23,6 @@ public class TransactionFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String transactionId = request.getHeader("X-Transaction-Id");
-
-        if (transactionId == null || transactionId.isBlank()) {
-            response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Missing X-Transaction-Id header");
-            return;
-        }
-
-        response.setHeader("X-Transaction-Id", transactionId);
-        response.setHeader("X-Service-Name", serviceName);
 
         filterChain.doFilter(request, response);
     }

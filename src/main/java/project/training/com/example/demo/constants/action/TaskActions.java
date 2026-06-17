@@ -5,4 +5,5 @@ public final class TaskActions {
     private TaskActions() {}
 
     public static final String CREATE_TASK = "CREATE_TASK";
+    public static final String GET_TASK = "GET_TASK";
 }

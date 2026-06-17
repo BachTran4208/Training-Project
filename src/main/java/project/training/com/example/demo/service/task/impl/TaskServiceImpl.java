@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.entity.Task;
+import project.training.com.example.demo.exception.AppException;
+import project.training.com.example.demo.exception.ErrorCode;
 import project.training.com.example.demo.mapper.TaskMapper;
 import project.training.com.example.demo.repository.TaskRepository;
 import project.training.com.example.demo.service.task.TaskService;
@@ -32,5 +34,15 @@ public class TaskServiceImpl implements TaskService {
         Task saved = taskRepository.save(task);
         
         return taskMapper.toResponse(saved);
+    }
+
+    @Override
+    @ServiceActivator(inputChannel = "GET_TASK_CHANNEL")
+    public TaskResponse getTask(Long taskId) {
+        
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        
+        return taskMapper.toResponse(task);
     }
 }

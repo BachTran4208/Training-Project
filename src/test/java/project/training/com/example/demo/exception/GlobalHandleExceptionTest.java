@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import project.training.com.example.demo.controller.TaskController;
+import project.training.com.example.demo.dto.RequestObject;
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.gateway.TaskGateway;
@@ -34,6 +35,14 @@ public class GlobalHandleExceptionTest {
     @MockitoBean
     private TaskGateway taskGateway;
 
+    private RequestObject<CreateTaskRequest> wrap(CreateTaskRequest request) {
+
+        return RequestObject.<CreateTaskRequest>builder()
+                .transactionId("txn-123")
+                .serviceName("task-service")
+                .data(request)
+                .build();
+    }
 
     @Test
     void shouldFail_whenTitleIsBlank() throws Exception {
@@ -44,9 +53,10 @@ public class GlobalHandleExceptionTest {
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(wrap(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.title").value("Title is required"));
+                .andExpect(jsonPath("$.data['data.title']")
+                        .value("Title is required"));
     }
 
     @Test
@@ -58,9 +68,10 @@ public class GlobalHandleExceptionTest {
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(wrap(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.title").value("Title must be <= 100 characters"));
+                .andExpect(jsonPath("$.data['data.title']")
+                        .value("Title must be <= 100 characters"));
     }
 
     @Test
@@ -73,9 +84,10 @@ public class GlobalHandleExceptionTest {
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(wrap(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.assignee").value("Assignee name too long"));
+                .andExpect(jsonPath("$.data['data.assignee']")
+                        .value("Assignee name too long"));
     }
 
     @Test
@@ -87,9 +99,9 @@ public class GlobalHandleExceptionTest {
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(wrap(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.point").value("Point must be one of: 1, 2, 3, 5, 8"));
+                .andExpect(jsonPath("$.data['data.point']").value("Point must be one of: 1, 2, 3, 5, 8"));
     }
 
     @Test
@@ -101,9 +113,9 @@ public class GlobalHandleExceptionTest {
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(wrap(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.point")
+                .andExpect(jsonPath("$.data['data.point']")
                         .value("Point must be one of: 1, 2, 3, 5, 8"));
     }
 
@@ -117,8 +129,8 @@ public class GlobalHandleExceptionTest {
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(jsonPath("$.errors.estimateTime").value("Estimate time must be >= 0"));
+                        .content(objectMapper.writeValueAsString(wrap(request))))
+                .andExpect(jsonPath("$.data['data.estimateTime']").value("Estimate time must be >= 0"));
     }
 
     @Test
@@ -130,10 +142,10 @@ public class GlobalHandleExceptionTest {
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(wrap(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors.title").exists())
-                .andExpect(jsonPath("$.errors.point").exists());
+                .andExpect(jsonPath("$.data['data.title']").exists())
+                .andExpect(jsonPath("$.data['data.point']").exists());
     }
 
     @Test
@@ -158,7 +170,7 @@ public class GlobalHandleExceptionTest {
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(wrap(request))))
                 .andExpect(status().isCreated());
 
         verify(taskGateway).createTask(any());

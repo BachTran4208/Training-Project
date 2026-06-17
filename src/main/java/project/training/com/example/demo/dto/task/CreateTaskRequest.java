@@ -14,7 +14,6 @@ public class CreateTaskRequest {
     @Size(max = 50, message = "Assignee name too long")
     private String assignee;
 
-    @NotNull(message = "Point is required")
     @ValidPoint(message = "Point must be one of: 1, 2, 3, 5, 8")
     private Integer point;
 
