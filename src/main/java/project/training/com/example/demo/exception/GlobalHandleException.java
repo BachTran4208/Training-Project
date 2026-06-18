@@ -4,9 +4,11 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import project.training.com.example.demo.dto.RequestObject;
 import project.training.com.example.demo.dto.ResponseObject;
@@ -42,6 +44,36 @@ public class GlobalHandleException {
             .data(errors)
             .build();
 
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ResponseObject<Void>> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex) {
+
+        String transactionId = MDC.get("transactionId");
+        ResponseObject<Void> response = ResponseObject.<Void>builder()
+            .message("Malformed JSON request")
+            .status(HttpStatus.BAD_REQUEST.value())
+            .transactionId(transactionId)
+            .serviceName(serviceName)
+            .data(null)
+            .build();
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ResponseObject<Void>> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex) {
+
+        String transactionId = MDC.get("transactionId");
+        ResponseObject<Void> response = ResponseObject.<Void>builder()
+            .message("Type mismatch error")
+            .status(HttpStatus.BAD_REQUEST.value())
+            .transactionId(transactionId)
+            .serviceName(serviceName)
+            .data(null)
+            .build();
         return ResponseEntity.badRequest().body(response);
     }
 

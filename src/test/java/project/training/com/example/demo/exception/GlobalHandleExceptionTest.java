@@ -22,12 +22,14 @@ import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.gateway.TaskGateway;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -223,14 +225,31 @@ public class GlobalHandleExceptionTest {
         request.setPoint(3);
 
         when(taskGateway.createTask(any()))
-                .thenThrow(
-                        new AppException(
-                                ErrorCode.RESOURCE_NOT_FOUND));
+                .thenThrow(new AppException(ErrorCode.INTERNAL_SERVER_ERROR, new RuntimeException("Database connection failed")));
 
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(wrap(request))))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.data")
+                        .value("Database connection failed"));
+    }
+
+    @Test
+    void shouldHandleAppExceptionWithNoCause() throws Exception {
+
+        CreateTaskRequest request = new CreateTaskRequest();
+        request.setTitle("Exception with no cause");
+        request.setPoint(3);
+        
+        when(taskGateway.createTask(any()))
+            .thenThrow(new AppException(ErrorCode.INTERNAL_SERVER_ERROR));
+
+
+        mockMvc.perform(post("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(wrap(request))))
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.data")
                         .doesNotExist());
     }
@@ -277,5 +296,33 @@ public class GlobalHandleExceptionTest {
                         .value(500))
                 .andExpect(jsonPath("$.data")
                         .value("Database connection failed"));
+    }
+
+    @Test
+    void shouldHandleHttpMessageNotReadable() throws Exception {
+
+        mockMvc.perform(post("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Malformed JSON request"))
+                .andExpect(jsonPath("$.status")
+                        .value(400))
+                .andExpect(jsonPath("$.data")
+                        .doesNotExist());
+    }
+
+    @Test
+    void shouldHandleMethodArgumentTypeMismatch() throws Exception {
+
+        mockMvc.perform(get("/task/a"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Type mismatch error"))
+                .andExpect(jsonPath("$.status")
+                        .value(400))
+                .andExpect(jsonPath("$.data")
+                        .doesNotExist());
     }
 }
