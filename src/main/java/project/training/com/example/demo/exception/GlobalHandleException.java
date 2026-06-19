@@ -72,7 +72,6 @@ public class GlobalHandleException {
             .status(HttpStatus.BAD_REQUEST.value())
             .transactionId(transactionId)
             .serviceName(serviceName)
-            .data(null)
             .build();
         return ResponseEntity.badRequest().body(response);
     }
