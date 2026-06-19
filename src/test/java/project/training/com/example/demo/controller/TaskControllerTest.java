@@ -7,7 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import project.training.com.example.demo.dto.RequestObject;
+import project.training.com.example.demo.dto.ApiRequest;
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.gateway.TaskGateway;
@@ -42,10 +42,9 @@ class TaskControllerTest {
         createTaskRequest.setAssignee("John"); // optional
         createTaskRequest.setEstimateTime(2); // optional
 
-        RequestObject<CreateTaskRequest> requestObject =
-            RequestObject.<CreateTaskRequest>builder()
+        ApiRequest<CreateTaskRequest> requestObject =
+            ApiRequest.<CreateTaskRequest>builder()
                     .transactionId("txn-123")
-                    .serviceName("demo")
                     .data(createTaskRequest)
                     .build();
 
@@ -84,10 +83,9 @@ class TaskControllerTest {
         // given
         Long taskId = 1L;
 
-        RequestObject<Void> requestObject =
-                RequestObject.<Void>builder()
+        ApiRequest<Void> requestObject =
+                ApiRequest.<Void>builder()
                         .transactionId("txn-456")
-                        .serviceName("demo")
                         .build();
 
         TaskResponse response = new TaskResponse();

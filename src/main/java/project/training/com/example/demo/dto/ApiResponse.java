@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class ResponseObject<T> {
+public class ApiResponse<T> {
     @JsonProperty("message")
     private String message;
 

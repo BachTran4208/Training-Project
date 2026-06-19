@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import project.training.com.example.demo.dto.RequestObject;
-import project.training.com.example.demo.dto.ResponseObject;
+import project.training.com.example.demo.constants.AppConstants;
+import project.training.com.example.demo.dto.ApiRequest;
+import project.training.com.example.demo.dto.ApiResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,11 +33,11 @@ public class GlobalHandleException {
                         errors.put(error.getField(), error.getDefaultMessage())
                 );
 
-        RequestObject<?> requestObject =
-            (RequestObject<?>) ex.getBindingResult()
+        ApiRequest<?> requestObject =
+            (ApiRequest<?>) ex.getBindingResult()
                     .getTarget();
 
-        ResponseObject<Map<String, String>> response = ResponseObject.<Map<String, String>>builder()
+        ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
             .message("Validation failed")
             .status(HttpStatus.BAD_REQUEST.value())
             .transactionId(requestObject != null ? requestObject.getTransactionId() : null)
@@ -48,26 +49,25 @@ public class GlobalHandleException {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ResponseObject<Void>> handleHttpMessageNotReadable(
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex) {
 
-        String transactionId = MDC.get("transactionId");
-        ResponseObject<Void> response = ResponseObject.<Void>builder()
+        String transactionId = MDC.get(AppConstants.TRANSACTION_ID);
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
             .message("Malformed JSON request")
             .status(HttpStatus.BAD_REQUEST.value())
             .transactionId(transactionId)
             .serviceName(serviceName)
-            .data(null)
             .build();
         return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ResponseObject<Void>> handleTypeMismatch(
+    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(
             MethodArgumentTypeMismatchException ex) {
 
-        String transactionId = MDC.get("transactionId");
-        ResponseObject<Void> response = ResponseObject.<Void>builder()
+        String transactionId = MDC.get(AppConstants.TRANSACTION_ID);
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
             .message("Type mismatch error")
             .status(HttpStatus.BAD_REQUEST.value())
             .transactionId(transactionId)
@@ -80,9 +80,9 @@ public class GlobalHandleException {
     @ExceptionHandler(AppException.class)
     public ResponseEntity<?> handleAppException(AppException ex) {
 
-        String transactionId = MDC.get("transactionId");
+        String transactionId = MDC.get(AppConstants.TRANSACTION_ID);
 
-        ResponseObject<String> response = ResponseObject.<String>builder()
+        ApiResponse<String> response = ApiResponse.<String>builder()
             .message(ex.getErrorCode().getMessage())
             .status(ex.getErrorCode().getCode())
             .transactionId(transactionId)
@@ -97,9 +97,9 @@ public class GlobalHandleException {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleUnexpectedException(Exception ex) {
 
-        String transactionId = MDC.get("transactionId");
+        String transactionId = MDC.get(AppConstants.TRANSACTION_ID);
 
-        ResponseObject<String> response = ResponseObject.<String>builder()
+        ApiResponse<String> response = ApiResponse.<String>builder()
             .message("An unexpected error occurred")
             .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
             .transactionId(transactionId)

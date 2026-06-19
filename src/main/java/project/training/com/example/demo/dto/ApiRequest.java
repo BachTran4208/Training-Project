@@ -10,13 +10,10 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class RequestObject<T> {
+public class ApiRequest<T> {
     
     @NotBlank(message = "TransactionId is required")
     private String transactionId;
-
-    @NotBlank(message = "ServiceName is required")
-    private String serviceName;
 
     private @Valid T data;
 }

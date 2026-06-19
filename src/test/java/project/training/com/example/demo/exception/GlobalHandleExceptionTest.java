@@ -15,14 +15,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import project.training.com.example.demo.controller.TaskController;
-import project.training.com.example.demo.dto.RequestObject;
-import project.training.com.example.demo.dto.ResponseObject;
+import project.training.com.example.demo.dto.ApiRequest;
+import project.training.com.example.demo.dto.ApiResponse;
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.gateway.TaskGateway;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,11 +46,10 @@ public class GlobalHandleExceptionTest {
     @MockitoBean
     private TaskGateway taskGateway;
 
-    private RequestObject<CreateTaskRequest> wrap(CreateTaskRequest request) {
+    private ApiRequest<CreateTaskRequest> wrap(CreateTaskRequest request) {
 
-        return RequestObject.<CreateTaskRequest>builder()
+        return ApiRequest.<CreateTaskRequest>builder()
                 .transactionId("txn-123")
-                .serviceName("task-service")
                 .data(request)
                 .build();
     }
@@ -170,7 +168,7 @@ public class GlobalHandleExceptionTest {
     }
 
     @Test
-    void shouldCreateTask_success() throws Exception {
+    void shouldSucceed_whenValidRequest() throws Exception {
 
         CreateTaskRequest request = new CreateTaskRequest();
         request.setTitle("Valid title");
@@ -211,14 +209,14 @@ public class GlobalHandleExceptionTest {
 
         ResponseEntity<?> responseEntity = handler.handleValidation(ex);
 
-        ResponseObject<?> response = (ResponseObject<?>) responseEntity.getBody();
+        ApiResponse<?> response = (ApiResponse<?>) responseEntity.getBody();
 
         assertNotNull(response);
-        assertNull(response.getTransactionId()); // cover nhánh null
+        assertNull(response.getTransactionId());
     }
 
     @Test
-    void shouldHandleAppExceptionWithCause() throws Exception {
+    void handleAppException_whenAppExceptionThrown() throws Exception {
 
         CreateTaskRequest request = new CreateTaskRequest();
         request.setTitle("Valid title");
@@ -236,14 +234,14 @@ public class GlobalHandleExceptionTest {
     }
 
     @Test
-    void shouldHandleAppExceptionWithNoCause() throws Exception {
+    void handleAppException_whenCauseMessageIsUnavailable() throws Exception {
 
         CreateTaskRequest request = new CreateTaskRequest();
         request.setTitle("Exception with no cause");
         request.setPoint(3);
         
         when(taskGateway.createTask(any()))
-            .thenThrow(new AppException(ErrorCode.INTERNAL_SERVER_ERROR));
+            .thenThrow(new AppException(ErrorCode.INTERNAL_SERVER_ERROR), new RuntimeException("Unkown error"));
 
 
         mockMvc.perform(post("/task")
