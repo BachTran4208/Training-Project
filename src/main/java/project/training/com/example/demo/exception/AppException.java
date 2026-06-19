@@ -7,5 +7,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AppException extends RuntimeException {
     private final ErrorCode errorCode;
+
+    public AppException(ErrorCode errorCode, Throwable cause) {
+        super(cause);
+        this.errorCode = errorCode;
+    }
 }
 

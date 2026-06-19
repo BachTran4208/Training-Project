@@ -3,6 +3,7 @@ package project.training.com.example.demo.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import project.training.com.example.demo.dto.RequestObject;
-import project.training.com.example.demo.dto.ResponseObject;
+import project.training.com.example.demo.constants.AppConstants;
+import project.training.com.example.demo.dto.ApiRequest;
+import project.training.com.example.demo.dto.ApiResponse;
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.gateway.TaskGateway;
@@ -30,14 +32,16 @@ public class TaskController {
     private final TaskGateway taskGateway;
 
     @PostMapping
-    public ResponseEntity<ResponseObject> create(@Valid @RequestBody RequestObject<CreateTaskRequest> requestObject) {
+    public ResponseEntity<ApiResponse<TaskResponse>> create(@Valid @RequestBody ApiRequest<CreateTaskRequest> requestObject) {
 
+        MDC.put(AppConstants.TRANSACTION_ID, requestObject.getTransactionId());
+        
         CreateTaskRequest createTaskRequest = requestObject.getData();
 
         TaskResponse task = taskGateway.createTask(createTaskRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseObject.builder()
+                .body(ApiResponse.<TaskResponse>builder()
                         .message("Create task successfully")
                         .status(HttpStatus.CREATED.value())
                         .transactionId(requestObject.getTransactionId())
@@ -47,12 +51,14 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<ResponseObject> get(@Valid @PathVariable Long taskId, @Valid RequestObject<Void> requestObject) {
+    public ResponseEntity<ApiResponse<TaskResponse>> get(@Valid @PathVariable Long taskId, @Valid @RequestBody ApiRequest<Void> requestObject) {
+
+        MDC.put(AppConstants.TRANSACTION_ID, requestObject.getTransactionId());
 
         TaskResponse task = taskGateway.getTask(taskId);
         
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseObject.builder()
+                .body(ApiResponse.<TaskResponse>builder()
                         .message("Task found")
                         .status(HttpStatus.OK.value())
                         .transactionId(requestObject.getTransactionId())

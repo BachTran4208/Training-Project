@@ -7,7 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import project.training.com.example.demo.dto.RequestObject;
+import project.training.com.example.demo.dto.ApiRequest;
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.gateway.TaskGateway;
@@ -15,6 +15,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,10 +42,9 @@ class TaskControllerTest {
         createTaskRequest.setAssignee("John"); // optional
         createTaskRequest.setEstimateTime(2); // optional
 
-        RequestObject<CreateTaskRequest> requestObject =
-            RequestObject.<CreateTaskRequest>builder()
+        ApiRequest<CreateTaskRequest> requestObject =
+            ApiRequest.<CreateTaskRequest>builder()
                     .transactionId("txn-123")
-                    .serviceName("demo")
                     .data(createTaskRequest)
                     .build();
 
@@ -75,5 +75,43 @@ class TaskControllerTest {
                     .value("Test task"));
 
         verify(taskGateway, times(1)).createTask(any(CreateTaskRequest.class));
+    }
+
+    @Test
+    void getTask_success() throws Exception {
+
+        // given
+        Long taskId = 1L;
+
+        ApiRequest<Void> requestObject =
+                ApiRequest.<Void>builder()
+                        .transactionId("txn-456")
+                        .build();
+
+        TaskResponse response = new TaskResponse();
+        response.setId(taskId);
+        response.setTitle("Test task");
+
+        when(taskGateway.getTask(taskId)).thenReturn(response);
+
+        // when + then
+        mockMvc.perform(get("/task/{taskId}", taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestObject)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message")
+                        .value("Task found"))
+                .andExpect(jsonPath("$.status")
+                        .value(200))
+                .andExpect(jsonPath("$.transactionId")
+                        .value("txn-456"))
+                .andExpect(jsonPath("$.serviceName")
+                        .value("demo"))
+                .andExpect(jsonPath("$.data.id")
+                        .value(1))
+                .andExpect(jsonPath("$.data.title")
+                        .value("Test task"));
+
+        verify(taskGateway, times(1)).getTask(taskId);
     }
 }
