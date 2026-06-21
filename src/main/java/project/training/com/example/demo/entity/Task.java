@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "task")
@@ -39,4 +40,7 @@ public class Task {
 
     private Integer actualTime;
     private Integer remainingTime;
+
+    @OneToMany(mappedBy = "task")
+    private List<TaskLog> logs;
 }

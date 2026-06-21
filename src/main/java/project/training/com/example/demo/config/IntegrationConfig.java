@@ -23,6 +23,21 @@ public class IntegrationConfig {
         return new DirectChannel();
     }
 
+    @Bean("GET_TASK_CHANNEL")
+    public MessageChannel getTaskChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean("UPDATE_TASK_CHANNEL")
+    public MessageChannel updateTaskChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean("LOG_TASK_CHANNEL")
+    public MessageChannel logTaskChannel() {
+        return new DirectChannel();
+    }
+
     @Bean("errorChannel")
     public MessageChannel errorChannel() {
         return new DirectChannel();

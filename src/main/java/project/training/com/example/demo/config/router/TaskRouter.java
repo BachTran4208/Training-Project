@@ -26,6 +26,10 @@ public class TaskRouter {
                     ChannelNames.CREATE_TASK_CHANNEL;
             case TaskActions.GET_TASK ->
                     ChannelNames.GET_TASK_CHANNEL;
+            case TaskActions.UPDATE_TASK ->
+                    ChannelNames.UPDATE_TASK_CHANNEL;
+            case TaskActions.LOG_TASK -> 
+                    ChannelNames.LOG_TASK_CHANNEL;
             default ->
                     ChannelNames.ERROR_CHANNEL;
         };
