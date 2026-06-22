@@ -514,8 +514,6 @@ class TaskServiceImplTest {
 
         assertEquals(5, savedTask.getActualTime());
 
-        // estimateTime == null nên block này không chạy
-        // remainingTime giữ nguyên giá trị hiện tại (thường là null)
         assertNull(savedTask.getRemainingTime());
     }
 }
