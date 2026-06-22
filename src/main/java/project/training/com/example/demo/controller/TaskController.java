@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,9 +55,12 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<ApiResponse<TaskResponse>> get(@Valid @PathVariable Long taskId, @Valid @RequestBody ApiRequest<Void> requestObject) {
+    public ResponseEntity<ApiResponse<TaskResponse>> get(
+        @Valid @PathVariable Long taskId,
+        @RequestHeader("X-Transaction-Id") String transactionId
+    ) {
 
-        MDC.put(AppConstants.TRANSACTION_ID, requestObject.getTransactionId());
+        MDC.put(AppConstants.TRANSACTION_ID, transactionId);
 
         TaskResponse task = taskGateway.getTask(taskId);
         
@@ -64,7 +68,7 @@ public class TaskController {
                 .body(ApiResponse.<TaskResponse>builder()
                         .message("Task found")
                         .status(HttpStatus.OK.value())
-                        .transactionId(requestObject.getTransactionId())
+                        .transactionId(transactionId)
                         .serviceName(serviceName)
                         .data(task)
                         .build());

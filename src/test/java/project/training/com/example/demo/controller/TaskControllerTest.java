@@ -90,10 +90,7 @@ class TaskControllerTest {
         // given
         Long taskId = 1L;
 
-        ApiRequest<Void> requestObject =
-                ApiRequest.<Void>builder()
-                        .transactionId("txn-456")
-                        .build();
+        String transactionId = "txn-456";
 
         TaskResponse response = new TaskResponse();
         response.setId(taskId);
@@ -104,7 +101,7 @@ class TaskControllerTest {
         // when + then
         mockMvc.perform(get("/task/{taskId}", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestObject)))
+                        .header("X-Transaction-Id", transactionId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message")
                         .value("Task found"))

@@ -57,8 +57,7 @@ public class LogTaskRequestTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            "-1",
-            "0"
+            "-1"
     })
     void shouldFailValidation_SpentHourField(Integer spentHour) {
         LogTaskRequest request = validRequest();

@@ -13,6 +13,6 @@ public class LogTaskRequest {
     private LocalDate date;
 
     @NotNull
-    @Min(1)
+    @Min(0)
     private Integer spentHour;
 }
