@@ -13,7 +13,7 @@ public class Flow {
     public IntegrationFlow mainFlow() {
         return IntegrationFlow.from(ChannelNames.INPUT_CHANNEL)
                 .log(message -> "INPUT: " + message.getPayload())
-                .channel(ChannelNames.ROUTER_CHANNEL)
+                .channel(ChannelNames.DOMAIN_CHANNEL)
                 .get();
     }
 }
