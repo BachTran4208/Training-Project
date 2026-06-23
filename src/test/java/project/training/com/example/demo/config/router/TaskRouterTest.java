@@ -13,7 +13,6 @@ import project.training.com.example.demo.constants.action.TaskActions;
 import project.training.com.example.demo.constants.channel.ChannelNames;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
 
@@ -32,12 +31,14 @@ public class TaskRouterTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentException_whenActionIsNull() {
+    void shouldRouteToErrorChannel_whenActionIsNull() {
         Message<String> message = MessageBuilder
                 .withPayload("anything")
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> taskRouter.route(message));
+        String result = taskRouter.route(message);
+
+        assertEquals(ChannelNames.ERROR_CHANNEL, result);
     }
 
     @ParameterizedTest

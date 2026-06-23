@@ -18,7 +18,7 @@ public class UserRouter {
                 .get(MessageHeaders.ACTION);
 
         if (action == null) {
-            throw new IllegalArgumentException("Action cannot be null");
+            return ChannelNames.ERROR_CHANNEL;
         }
 
         return switch (action) {

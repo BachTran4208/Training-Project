@@ -1,7 +1,6 @@
 package project.training.com.example.demo.service.user.impl;
 
 import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -9,7 +8,6 @@ import project.training.com.example.demo.dto.user.CreateUserRequest;
 import project.training.com.example.demo.dto.user.UserResponse;
 import project.training.com.example.demo.entity.Role;
 import project.training.com.example.demo.entity.User;
-import project.training.com.example.demo.exception.AppException;
 import project.training.com.example.demo.mapper.UserMapper;
 import project.training.com.example.demo.repository.UserRepository;
 import project.training.com.example.demo.service.user.UserService;

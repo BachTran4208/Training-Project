@@ -11,11 +11,15 @@ import project.training.com.example.demo.constants.channel.ChannelNames;
 @Component
 public class DomainRouter {
 
-    @Router(inputChannel = "domainChannel")
+    @Router(inputChannel = ChannelNames.DOMAIN_CHANNEL)
     public String route(Message<?> message) {
-        
+
         String domain = (String) message.getHeaders()
                 .get(MessageHeaders.DOMAIN);
+
+        if (domain == null) {
+            return ChannelNames.ERROR_CHANNEL;
+        } 
 
         return switch (domain) {
             case Domain.USER_DOMAIN ->

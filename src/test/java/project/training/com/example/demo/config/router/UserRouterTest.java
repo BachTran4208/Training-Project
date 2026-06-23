@@ -32,12 +32,14 @@ public class UserRouterTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentException_whenActionIsNull() {
+    void shouldRouteToErrorChannel_whenActionIsNull() {
         Message<String> message = MessageBuilder
                 .withPayload("anything")
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> taskRouter.route(message));
+        String result = taskRouter.route(message);
+
+        assertEquals(ChannelNames.ERROR_CHANNEL, result);
     }
 
     @ParameterizedTest
