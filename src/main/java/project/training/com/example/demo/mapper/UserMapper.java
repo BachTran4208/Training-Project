@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Component;
 
 import project.training.com.example.demo.dto.user.CreateUserRequest;
+import project.training.com.example.demo.dto.user.UpdateUserRequest;
 import project.training.com.example.demo.dto.user.UserResponse;
 import project.training.com.example.demo.entity.User;
 
@@ -57,6 +58,36 @@ public class UserMapper {
 
         return user;
     }
+
+    public void updateUser(User user, UpdateUserRequest request) {
+
+        if (request == null || user == null) return;
+
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+
+        if (request.getDob() != null) {
+            user.setDob(convertDob(request.getDob()));
+        }
+
+        if (request.getEmail() != null) {
+            user.setEmail(request.getEmail().toLowerCase());
+        }
+
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+
+        if (request.getOffice() != null) {
+            user.setOffice(request.getOffice());
+        }
+
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+        }
+    }
+
 
     public Instant convertDob(String dob) {
 

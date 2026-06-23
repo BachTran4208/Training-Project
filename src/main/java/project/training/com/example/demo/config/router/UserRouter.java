@@ -24,6 +24,8 @@ public class UserRouter {
         return switch (action) {
             case UserActions.CREATE_USER ->
                     ChannelNames.CREATE_USER_CHANNEL;
+            case UserActions.UPDATE_USER ->
+                    ChannelNames.UPDATE_USER_CHANNEL;
             default ->
                     ChannelNames.ERROR_CHANNEL;
         };

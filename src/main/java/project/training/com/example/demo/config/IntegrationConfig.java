@@ -43,6 +43,16 @@ public class IntegrationConfig {
         return new DirectChannel();
     }
 
+    @Bean("UPDATE_USER_CHANNEL")
+    public MessageChannel updateUserChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean("DOMAIN_CHANNEL")
+    public MessageChannel domainChannel() {
+        return new DirectChannel();
+    }
+
     @Bean("errorChannel")
     public MessageChannel errorChannel() {
         return new DirectChannel();

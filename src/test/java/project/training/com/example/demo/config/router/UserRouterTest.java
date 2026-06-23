@@ -1,8 +1,6 @@
 package project.training.com.example.demo.config.router;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;

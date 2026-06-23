@@ -2,6 +2,7 @@ package project.training.com.example.demo.entity;
 
 import java.time.Instant;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,6 +27,7 @@ public class User {
 
     private Instant dob;
 
+    @Column(unique = true)
     private String email;
 
     private String phone;
