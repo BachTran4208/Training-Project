@@ -26,7 +26,8 @@ public class TaskRouterTest {
         return Stream.of(
                 Arguments.of(TaskActions.CREATE_TASK, ChannelNames.CREATE_TASK_CHANNEL),
                 Arguments.of("unknown", ChannelNames.ERROR_CHANNEL),
-                Arguments.of(TaskActions.GET_TASK, ChannelNames.GET_TASK_CHANNEL)
+                Arguments.of(TaskActions.GET_TASK, ChannelNames.GET_TASK_CHANNEL),
+                Arguments.of(TaskActions.UPDATE_TASK, ChannelNames.UPDATE_TASK_CHANNEL)
         );
     }
 

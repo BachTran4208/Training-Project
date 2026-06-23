@@ -7,7 +7,9 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.data.geo.Point;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -37,19 +39,19 @@ public class CreateTaskRequestTest {
 	}
 
 	static Stream<TestCase> invalidCases() {
-		return Stream.of(
+            return Stream.of(
 
-			// ===== TITLE =====
-            new TestCase(
-                    "blank title",
-                    new CreateTaskRequest() {{
-                        setTitle("");
-                        setPoint(5);
-                        setEstimateTime(10);
-                        setAssignee("John");
-                    }},
-                    "Title is required"
-            ),
+                // ===== TITLE =====
+                new TestCase(
+                        "blank title",
+                        new CreateTaskRequest() {{
+                            setTitle("");
+                            setPoint(5);
+                            setEstimateTime(10);
+                            setAssignee("John");
+                        }},
+                        "Title is required"
+                ),
 
             new TestCase(
                     "title exceeds 100 characters",
@@ -123,4 +125,25 @@ public class CreateTaskRequestTest {
 		);
 	}
 
+    @ParameterizedTest()
+    @CsvSource(value = {
+        "-7 = Point must be one of: 1, 2, 3, 5, 8",
+        "null = Point must be one of: 1, 2, 3, 5, 8",
+    }, delimiter = '=', nullValues = "null")
+    void shouldFailValidation_PointField(Integer point, String expectedMessage) {
+        CreateTaskRequest request = new CreateTaskRequest();
+        request.setTitle("Task");
+        request.setPoint(point);
+        request.setEstimateTime(10);
+        request.setAssignee("John");
+
+        Set<ConstraintViolation<CreateTaskRequest>> violations =
+                validator.validate(request);
+
+        assertTrue(
+                violations.stream()
+                        .anyMatch(v -> v.getMessage().equals(expectedMessage))
+        );
+    }
+	
 }
