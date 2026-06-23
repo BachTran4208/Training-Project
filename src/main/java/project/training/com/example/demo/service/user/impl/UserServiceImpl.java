@@ -33,18 +33,4 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toUserResponse(saved);
     }
-
-    public void normalizeRole(User user) {
-
-        if (user.getRole() == null) {
-            user.setRole(Role.OTHER);
-            return;
-        }
-
-        try {
-            Role.valueOf(user.getRole().name());
-        } catch (Exception ex) {
-            user.setRole(Role.OTHER);
-        }
-    }
 }
