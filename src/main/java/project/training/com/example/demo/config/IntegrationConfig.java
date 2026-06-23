@@ -38,6 +38,11 @@ public class IntegrationConfig {
         return new DirectChannel();
     }
 
+    @Bean("CREATE_USER_CHANNEL")
+    public MessageChannel createUserChannel() {
+        return new DirectChannel();
+    }
+
     @Bean("errorChannel")
     public MessageChannel errorChannel() {
         return new DirectChannel();

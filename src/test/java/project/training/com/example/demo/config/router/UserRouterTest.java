@@ -1,5 +1,10 @@
 package project.training.com.example.demo.config.router;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,12 +17,8 @@ import org.springframework.messaging.Message;
 import project.training.com.example.demo.constants.action.TaskActions;
 import project.training.com.example.demo.constants.channel.ChannelNames;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.stream.Stream;
-
 @ExtendWith(MockitoExtension.class)
-public class TaskRouterTest {
+public class UserRouterTest {
 
     private final TaskRouter taskRouter = new TaskRouter();
 
@@ -54,3 +55,4 @@ public class TaskRouterTest {
         assertEquals(expectedChannel, result);
     }
 }
+

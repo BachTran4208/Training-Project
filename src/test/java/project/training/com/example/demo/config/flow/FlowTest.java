@@ -11,8 +11,8 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import project.training.com.example.demo.config.IntegrationConfig;
-import project.training.com.example.demo.config.router.TaskRouter;
-
+import project.training.com.example.demo.config.router.DomainRouter;
+import project.training.com.example.demo.constants.Domain;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ContextConfiguration(classes = {
         IntegrationConfig.class,
         Flow.class,
-        TaskRouter.class
+        DomainRouter.class
 })
 class FlowTest {
 
@@ -31,23 +31,23 @@ class FlowTest {
     private MessageChannel inputChannel;
 
     @Autowired
-    @Qualifier("CREATE_TASK_CHANNEL")
-    private DirectChannel createTaskChannel;
+    @Qualifier("domainChannel")
+    private DirectChannel domainChannel;
 
     @Autowired
     @Qualifier("errorChannel")
     private DirectChannel errorChannel;
 
     @Test
-    void shouldRouteToCreateTaskChannel() {
+    void shouldRouteToDomainChannel() {
 
         AtomicReference<Message<?>> received = new AtomicReference<>();
 
-        createTaskChannel.subscribe(received::set);
+        domainChannel.subscribe(received::set);
 
         inputChannel.send(
                 MessageBuilder.withPayload("task")
-                        .setHeader("action", "CREATE_TASK")
+                        .setHeader("domain", Domain.TASK_DOMAIN)
                         .build()
         );
 
@@ -61,10 +61,9 @@ class FlowTest {
         AtomicReference<Message<?>> received = new AtomicReference<>();
 
         errorChannel.subscribe(received::set);
-
+        
         inputChannel.send(
                 MessageBuilder.withPayload("task")
-                        .setHeader("action", "UNKNOWN")
                         .build()
         );
 
