@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -18,6 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import project.training.com.example.demo.dto.user.CreateUserRequest;
 import project.training.com.example.demo.dto.user.UpdateUserRequest;
@@ -27,6 +28,7 @@ import project.training.com.example.demo.entity.User;
 import project.training.com.example.demo.exception.AppException;
 import project.training.com.example.demo.mapper.UserMapper;
 import project.training.com.example.demo.repository.UserRepository;
+import project.training.com.example.demo.security.JwtService;
 import project.training.com.example.demo.service.user.impl.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,13 +37,20 @@ class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private JwtService jwtService;
+
     private UserMapper userMapper = new UserMapper();
+
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private UserServiceImpl userService;
 
+    
+
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, userMapper);
+        userService = new UserServiceImpl(userRepository, userMapper, jwtService, passwordEncoder);
     }
 
     @Test

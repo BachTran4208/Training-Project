@@ -9,30 +9,35 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class JwtServiceTest {
-    private JwtService jwtService;
+import project.training.com.example.demo.config.app.AppProperties;
 
-    private final String SECRET = "my-super-secret-key-my-super-secret-key";
-    // phải đủ dài cho HS256
+public class JwtServiceTest {
+    private static final String SECRET_KEY = "my-super-secret-key-my-super-secret-key-1234"; 
+    private JwtService jwtService;
+    private AppProperties appProperties;
 
     @BeforeEach
     void setUp() {
-      jwtService = new JwtService(SECRET);
+        appProperties = new AppProperties();
+        appProperties.setSecretKey(SECRET_KEY);
+        appProperties.setJwtExpiration(3600L);
+
+        jwtService = new JwtService(appProperties);
     }
 
     @Test
     void shouldGenerateAndValidateToken() {
-      String username = "testuser";
+        String username = "testuser";
 
-      String token = jwtService.generateToken(username);
+        String token = jwtService.generateToken(username);
 
-      assertNotNull(token);
+        assertNotNull(token);
 
-      String extracted = jwtService.extractUsername(token);
-      assertEquals(username, extracted);
+        String extracted = jwtService.extractUsername(token);
+        assertEquals(username, extracted);
 
-      boolean valid = jwtService.isValid(token, username);
-      assertTrue(valid);
+        boolean valid = jwtService.isValid(token, username);
+        assertTrue(valid);
     }
 
     @Test

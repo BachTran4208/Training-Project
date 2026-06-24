@@ -5,12 +5,12 @@ import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import project.training.com.example.demo.config.app.AppProperties;
 
 @Service
 public class JwtService {
@@ -19,10 +19,10 @@ public class JwtService {
     private final SecretKey key;
     private final long jwtExpiration;
 
-    public JwtService(@Value("${app.secret-key}") String secretKey, @Value("${app.jwt-expiration}") long jwtExpiration) {
-        this.SECRET_KEY = secretKey;
+    public JwtService(AppProperties appProperties) {
+        this.SECRET_KEY = appProperties.getSecretKey();
         this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
-        this.jwtExpiration = jwtExpiration;
+        this.jwtExpiration = appProperties.getJwtExpiration();
     }
 
     public String generateToken(String username) {

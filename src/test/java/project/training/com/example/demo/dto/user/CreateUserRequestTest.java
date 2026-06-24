@@ -32,6 +32,7 @@ public class CreateUserRequestTest {
         request.setPhone("0912345678");
         request.setOffice("HCM");
         request.setRole(Role.MEMBER);
+        request.setPassword("Password123!");
 
         return request;
     }

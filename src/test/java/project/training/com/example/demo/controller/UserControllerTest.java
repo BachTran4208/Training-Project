@@ -48,9 +48,6 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // @MockitoBean
-    // private JwtAuthFilter jwtAuthFilter;
-
     @MockitoBean
     private JwtService jwtService;
 
@@ -66,6 +63,7 @@ class UserControllerTest {
         req.setEmail("john@example.com");
         req.setPhone("0912345678");
         req.setOffice("HCM");
+        req.setPassword("Password123!");
         req.setRole(null);
 
         ApiRequest<CreateUserRequest> requestObject =

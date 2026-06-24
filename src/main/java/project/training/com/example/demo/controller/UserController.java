@@ -6,13 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -21,10 +19,11 @@ import project.training.com.example.demo.constants.AppConstants;
 import project.training.com.example.demo.dto.ApiRequest;
 import project.training.com.example.demo.dto.ApiResponse;
 import project.training.com.example.demo.dto.user.CreateUserRequest;
+import project.training.com.example.demo.dto.user.LoginRequest;
+import project.training.com.example.demo.dto.user.LoginResponse;
 import project.training.com.example.demo.dto.user.UpdateUserRequest;
 import project.training.com.example.demo.dto.user.UserResponse;
 import project.training.com.example.demo.gateway.UserGateway;
-import project.training.com.example.demo.security.JwtService;
 
 @RestController
 @RequestMapping("/user")
@@ -35,7 +34,6 @@ public class UserController {
     private String serviceName;
 
     private final UserGateway userGateway;
-    private final JwtService jwtService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<UserResponse>> createUser(
@@ -77,9 +75,22 @@ public class UserController {
         );
     }
 
-    @GetMapping("/token")
-    public String getToken(@RequestParam String email) {
-        return jwtService.generateToken(email);
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
+            @Valid @RequestBody ApiRequest<LoginRequest> requestObject) {
+
+        MDC.put(AppConstants.TRANSACTION_ID, requestObject.getTransactionId());
+
+        LoginResponse response = userGateway.loginUser(requestObject.getData());
+
+        return ResponseEntity.ok(
+                ApiResponse.<LoginResponse>builder()
+                        .status(HttpStatus.OK.value())
+                        .message("Login successful")
+                        .transactionId(requestObject.getTransactionId())
+                        .data(response)
+                        .build()
+        );
     }
 
 }

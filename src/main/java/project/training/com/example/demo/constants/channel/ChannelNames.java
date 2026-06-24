@@ -18,5 +18,6 @@ public class ChannelNames {
 
     public static final String CREATE_USER_CHANNEL = "CREATE_USER_CHANNEL";
     public static final String UPDATE_USER_CHANNEL = "UPDATE_USER_CHANNEL";
+    public static final String LOGIN_USER_CHANNEL = "LOGIN_USER_CHANNEL";
     
 }

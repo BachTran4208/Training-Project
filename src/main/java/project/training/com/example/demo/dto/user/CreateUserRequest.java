@@ -27,5 +27,8 @@ public class CreateUserRequest {
     @NotBlank(message = "Office is not blank")
     private String office;
 
+    @NotBlank(message = "Password is not blank")
+    private String password;
+
     private Role role;
 }
