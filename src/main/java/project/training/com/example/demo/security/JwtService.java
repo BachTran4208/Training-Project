@@ -17,10 +17,12 @@ public class JwtService {
 
     private final String SECRET_KEY;
     private final SecretKey key;
+    private final long jwtExpiration;
 
-    public JwtService(@Value("${app.secret-key}") String secretKey) {
+    public JwtService(@Value("${app.secret-key}") String secretKey, @Value("${app.jwt-expiration}") long jwtExpiration) {
         this.SECRET_KEY = secretKey;
         this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        this.jwtExpiration = jwtExpiration;
     }
 
     public String generateToken(String username) {
@@ -28,7 +30,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }

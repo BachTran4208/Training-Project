@@ -39,8 +39,6 @@ public class TaskController {
     public ResponseEntity<ApiResponse<TaskResponse>> create(@Valid @RequestBody ApiRequest<CreateTaskRequest> requestObject) {
 
         MDC.put(AppConstants.TRANSACTION_ID, requestObject.getTransactionId());
-
-        System.out.println("👉 HIT CREATE TASK CONTROLLER");
         
         CreateTaskRequest createTaskRequest = requestObject.getData();
 
