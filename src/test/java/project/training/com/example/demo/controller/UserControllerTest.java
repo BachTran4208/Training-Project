@@ -2,27 +2,41 @@ package project.training.com.example.demo.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import project.training.com.example.demo.dto.ApiRequest;
 import project.training.com.example.demo.dto.user.CreateUserRequest;
+import project.training.com.example.demo.dto.user.UpdateUserRequest;
 import project.training.com.example.demo.dto.user.UserResponse;
+import project.training.com.example.demo.entity.Role;
 import project.training.com.example.demo.gateway.UserGateway;
+import project.training.com.example.demo.security.JwtService;
+import project.training.com.example.demo.service.user.impl.CustomUserDetailsService;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 
 @WebMvcTest(UserController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
 
     @Autowired
@@ -33,6 +47,15 @@ class UserControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    // @MockitoBean
+    // private JwtAuthFilter jwtAuthFilter;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
 
     @Test
     void createUser_success() throws Exception {
@@ -76,7 +99,6 @@ class UserControllerTest {
     void createUser_missingRequiredFields_shouldFail() throws Exception {
 
         CreateUserRequest req = new CreateUserRequest();
-        // bỏ trống name + office
 
         ApiRequest<CreateUserRequest> requestObject =
                 ApiRequest.<CreateUserRequest>builder()
@@ -160,5 +182,86 @@ class UserControllerTest {
 
         verify(userGateway, times(0))
                 .createUser(any(CreateUserRequest.class));
+    }
+
+    @Test
+    @WithMockUser(username = "john@example.com")
+    void editUser_success() throws Exception {
+
+        Long userId = 1L;
+
+        UpdateUserRequest update = new UpdateUserRequest();
+        update.setName("John Updated");
+        update.setDob("01-01-1990");
+        update.setEmail("john@example.com");
+        update.setPhone("0901234567");
+        update.setOffice("HCM");
+        update.setRole(Role.MEMBER);
+
+        ApiRequest<UpdateUserRequest> request =
+            ApiRequest.<UpdateUserRequest>builder()
+                .transactionId("txn-edit-001")
+                .data(update)
+                .build();
+
+        UserResponse response = new UserResponse();
+        response.setId(userId);
+        response.setName("John Updated");
+
+        when(userGateway.updateUser(eq(userId), eq("john@example.com"), any(UpdateUserRequest.class)))
+            .thenReturn(response);
+
+        mockMvc.perform(put("/user/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value(200))
+            .andExpect(jsonPath("$.message").value("User updated successfully"))
+            .andExpect(jsonPath("$.transactionId").value("txn-edit-001"))
+            .andExpect(jsonPath("$.data.id").value(1))
+            .andExpect(jsonPath("$.data.name").value("John Updated"));
+
+        verify(userGateway, times(1))
+            .updateUser(eq(userId), eq("john@example.com"), any(UpdateUserRequest.class));
+    }
+
+    @Test
+    @WithMockUser(username = "john@example.com")
+    void editUser_missingBody_shouldFail() throws Exception {
+
+        Long userId = 1L;
+
+        mockMvc.perform(put("/user/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+            .andExpect(status().isBadRequest());
+
+        verify(userGateway, never())
+                .updateUser(anyLong(), anyString(), any());
+    }
+
+    @Test
+    @WithMockUser(username = "john@example.com")
+    void editUser_invalidRequest_shouldFail() throws Exception {
+
+        Long userId = 1L;
+
+        UpdateUserRequest update = new UpdateUserRequest();
+        update.setName(""); // invalid
+
+        ApiRequest<UpdateUserRequest> request =
+                ApiRequest.<UpdateUserRequest>builder()
+                        .transactionId("txn-edit-002")
+                        .data(update)
+                        .build();
+
+        mockMvc.perform(put("/user/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest());
+
+        verify(userGateway, never())
+                .updateUser(anyLong(), anyString(), any());
     }
 }

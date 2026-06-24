@@ -12,16 +12,19 @@ public class CreateUserRequest {
     @NotBlank(message = "Name is required")
     private String name;
 
+    @NotBlank(message = "Dob is not blank")
     @ValidDob
     private String dob;
 
+    @NotBlank(message = "Email is not blank")
     @Email
     private String email;
 
+    @NotBlank(message = "Phone is not blank")
     @ValidPhone
     private String phone;
 
-    @NotBlank
+    @NotBlank(message = "Office is not blank")
     private String office;
 
     private Role role;

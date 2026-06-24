@@ -12,20 +12,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 
-import project.training.com.example.demo.constants.action.TaskActions;
+import project.training.com.example.demo.constants.action.UserActions;
 import project.training.com.example.demo.constants.channel.ChannelNames;
 
 @ExtendWith(MockitoExtension.class)
 public class UserRouterTest {
 
-    private final TaskRouter taskRouter = new TaskRouter();
+    private final UserRouter taskRouter = new UserRouter();
 
     static Stream<Arguments> provideActions() {
         return Stream.of(
-                Arguments.of(TaskActions.CREATE_TASK, ChannelNames.CREATE_TASK_CHANNEL),
-                Arguments.of("unknown", ChannelNames.ERROR_CHANNEL),
-                Arguments.of(TaskActions.GET_TASK, ChannelNames.GET_TASK_CHANNEL),
-                Arguments.of(TaskActions.UPDATE_TASK, ChannelNames.UPDATE_TASK_CHANNEL)
+                Arguments.of(UserActions.CREATE_USER, ChannelNames.CREATE_USER_CHANNEL),
+                Arguments.of(UserActions.UPDATE_USER, ChannelNames.UPDATE_USER_CHANNEL),
+                Arguments.of("unknown", ChannelNames.ERROR_CHANNEL)
         );
     }
 

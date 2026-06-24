@@ -2,12 +2,15 @@ package project.training.com.example.demo.service.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,9 +20,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import project.training.com.example.demo.dto.user.CreateUserRequest;
+import project.training.com.example.demo.dto.user.UpdateUserRequest;
 import project.training.com.example.demo.dto.user.UserResponse;
 import project.training.com.example.demo.entity.Role;
 import project.training.com.example.demo.entity.User;
+import project.training.com.example.demo.exception.AppException;
 import project.training.com.example.demo.mapper.UserMapper;
 import project.training.com.example.demo.repository.UserRepository;
 import project.training.com.example.demo.service.user.impl.UserServiceImpl;
@@ -178,5 +183,160 @@ class UserServiceImplTest {
         assertNotNull(response);
         assertEquals("OTHER", response.getRole());
         assertNotNull(response.getDob());
+    }
+
+    @Test
+    void updateUser_shouldSuccess_whenOwnerUpdatesSelf() {
+
+        // given
+        Long userId = 1L;
+        String email = "user@gmail.com";
+
+        User target = new User();
+        target.setId(userId);
+        target.setEmail(email);
+        target.setRole(Role.MEMBER);
+
+        User current = new User();
+        current.setEmail(email);
+        current.setRole(Role.MEMBER);
+
+        UpdateUserRequest request = new UpdateUserRequest();
+
+        when(userRepository.findById(userId))
+                .thenReturn(Optional.of(target));
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.of(current));
+
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // when
+        UserResponse response = userService.updateUser(userId, email, request);
+
+        // then
+        assertNotNull(response);
+        verify(userRepository).save(target);
+    }
+
+    @Test
+    void updateUser_shouldThrow_whenTargetUserNotFound() {
+
+        Long userId = 1L;
+
+        when(userRepository.findById(userId))
+                .thenReturn(Optional.empty());
+
+        UpdateUserRequest request = new UpdateUserRequest();
+
+        assertThrows(AppException.class,
+                () -> userService.updateUser(userId, "email@gmail.com", request));
+    }
+
+    @Test
+    void updateUser_shouldThrow_whenCurrentUserNotFound() {
+
+        Long userId = 1L;
+
+        User target = new User();
+        target.setId(userId);
+        target.setEmail("target@gmail.com");
+
+        when(userRepository.findById(userId))
+                .thenReturn(Optional.of(target));
+
+        when(userRepository.findByEmail("current@gmail.com"))
+                .thenReturn(Optional.empty());
+
+        UpdateUserRequest request = new UpdateUserRequest();
+
+        assertThrows(AppException.class,
+                () -> userService.updateUser(userId, "current@gmail.com", request));
+    }
+
+    @Test
+    void updateUser_shouldThrowUnauthorized_whenNotOwnerAndNotPrivileged() {
+
+        Long userId = 1L;
+
+        User target = new User();
+        target.setId(userId);
+        target.setEmail("target@gmail.com");
+        target.setRole(Role.MEMBER);
+
+        User current = new User();
+        current.setEmail("other@gmail.com");
+        current.setRole(Role.MEMBER);
+
+        when(userRepository.findById(userId))
+                .thenReturn(Optional.of(target));
+
+        when(userRepository.findByEmail("other@gmail.com"))
+                .thenReturn(Optional.of(current));
+
+        UpdateUserRequest request = new UpdateUserRequest();
+
+        assertThrows(AppException.class,
+                () -> userService.updateUser(userId, "other@gmail.com", request));
+    }
+
+    @Test
+    void updateUser_shouldThrow_whenOwnerTriesChangeRestrictedRole() {
+
+        Long userId = 1L;
+        String email = "user@gmail.com";
+
+        User target = new User();
+        target.setId(userId);
+        target.setEmail(email);
+        target.setRole(Role.MEMBER);
+
+        User current = new User();
+        current.setEmail(email);
+        current.setRole(Role.MEMBER);
+
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setRole(Role.PROJECT_OWNER); // attempt change
+
+        when(userRepository.findById(userId))
+                .thenReturn(Optional.of(target));
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.of(current));
+
+        assertThrows(AppException.class,
+                () -> userService.updateUser(userId, email, request));
+    }
+
+    @Test
+    void updateUser_shouldAllow_whenScrumMasterUpdatesOtherUser() {
+
+        Long userId = 1L;
+
+        User target = new User();
+        target.setId(userId);
+        target.setEmail("target@gmail.com");
+        target.setRole(Role.MEMBER);
+
+        User current = new User();
+        current.setEmail("scrum@gmail.com");
+        current.setRole(Role.SCRUM_MASTER);
+
+        UpdateUserRequest request = new UpdateUserRequest();
+
+        when(userRepository.findById(userId))
+                .thenReturn(Optional.of(target));
+
+        when(userRepository.findByEmail("scrum@gmail.com"))
+                .thenReturn(Optional.of(current));
+
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserResponse response = userService.updateUser(userId, "scrum@gmail.com", request);
+
+        assertNotNull(response);
+        verify(userRepository).save(target);
     }
 }

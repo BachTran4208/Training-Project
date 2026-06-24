@@ -56,6 +56,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
+        System.out.println("JWT FILTER HIT");
+        System.out.println("authHeader = " + authHeader);
+        System.out.println("username = " + username);
+        System.out.println("valid = " + jwtService.isValid(jwt, username));
+
         filterChain.doFilter(request, response);
     }
 }

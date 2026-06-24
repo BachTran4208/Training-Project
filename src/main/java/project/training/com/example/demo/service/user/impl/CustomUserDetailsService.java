@@ -3,7 +3,7 @@ package project.training.com.example.demo.service.user.impl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import project.training.com.example.demo.entity.User;
@@ -11,7 +11,7 @@ import project.training.com.example.demo.exception.AppException;
 import project.training.com.example.demo.exception.ErrorCode;
 import project.training.com.example.demo.repository.UserRepository;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
