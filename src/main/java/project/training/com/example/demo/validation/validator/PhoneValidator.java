@@ -12,7 +12,7 @@ public class PhoneValidator
                            ConstraintValidatorContext context) {
 
         if (value == null) {
-            return false;
+            return true;
         }
 
         return value.matches("\\d{10}");

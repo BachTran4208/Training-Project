@@ -8,8 +8,8 @@ import project.training.com.example.demo.validation.annotation.ValidDob;
 import project.training.com.example.demo.validation.annotation.ValidPhone;
 
 @Data
-public class CreateUserRequest {
-    @NotBlank(message = "Name is required")
+public class UpdateUserRequest {
+
     private String name;
 
     @NotBlank(message = "Dob is not blank")
@@ -24,11 +24,7 @@ public class CreateUserRequest {
     @ValidPhone
     private String phone;
 
-    @NotBlank(message = "Office is not blank")
     private String office;
-
-    @NotBlank(message = "Password is not blank")
-    private String password;
 
     private Role role;
 }

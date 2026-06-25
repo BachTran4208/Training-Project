@@ -32,6 +32,7 @@ public class CreateUserRequestTest {
         request.setPhone("0912345678");
         request.setOffice("HCM");
         request.setRole(Role.MEMBER);
+        request.setPassword("Password123!");
 
         return request;
     }
@@ -106,8 +107,8 @@ public class CreateUserRequestTest {
 
     @ParameterizedTest
     @CsvSource({
-            "'',must not be blank",
-            "'   ',must not be blank"
+            "'',Office is not blank",
+            "'   ',Office is not blank"
     })
     void shouldFailValidation_OfficeField(
             String office,
@@ -138,9 +139,9 @@ public class CreateUserRequestTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            "'',DOB must be in MM/dd/yyyy format",
-            "'   ',DOB must be in MM/dd/yyyy format",
-            "null,DOB must be in MM/dd/yyyy format",
+            "'',Dob is not blank",
+            "'   ',Dob is not blank",
+            "null,Dob is not blank",
             "2024-01-01,DOB must be in MM/dd/yyyy format",
             "13-01-2024,DOB must be in MM/dd/yyyy format"
     }, nullValues = "null")
@@ -178,7 +179,7 @@ public class CreateUserRequestTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            ",Phone must contain exactly 10 digits",
+            ",Phone is not blank",
             "123,Phone must contain exactly 10 digits",
             "123456789,Phone must contain exactly 10 digits",
             "12345678901,Phone must contain exactly 10 digits",

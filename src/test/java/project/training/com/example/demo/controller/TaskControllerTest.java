@@ -2,6 +2,7 @@ package project.training.com.example.demo.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -13,21 +14,21 @@ import project.training.com.example.demo.dto.task.LogTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
 import project.training.com.example.demo.dto.task.UpdateTaskRequest;
 import project.training.com.example.demo.gateway.TaskGateway;
+import project.training.com.example.demo.security.JwtService;
+import project.training.com.example.demo.service.user.impl.CustomUserDetailsService;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
 
 @WebMvcTest(TaskController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class TaskControllerTest {
 
     @Autowired
@@ -38,6 +39,12 @@ class TaskControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
 
     @Test
     void createTask_success() throws Exception {

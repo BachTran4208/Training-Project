@@ -34,3 +34,6 @@ build/
 
 ### Enviroment ###
 .env
+
+### Local ###
+src/main/resources/application-local.yaml

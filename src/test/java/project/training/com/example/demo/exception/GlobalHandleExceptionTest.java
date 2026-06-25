@@ -2,6 +2,7 @@ package project.training.com.example.demo.exception;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.MethodParameter;
@@ -19,6 +20,7 @@ import project.training.com.example.demo.dto.ApiRequest;
 import project.training.com.example.demo.dto.ApiResponse;
 import project.training.com.example.demo.dto.task.CreateTaskRequest;
 import project.training.com.example.demo.dto.task.TaskResponse;
+import project.training.com.example.demo.filter.JwtAuthFilter;
 import project.training.com.example.demo.gateway.TaskGateway;
 import tools.jackson.databind.ObjectMapper;
 
@@ -35,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(TaskController.class)
 @Import(GlobalHandleException.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class GlobalHandleExceptionTest {
 
     @Autowired
@@ -45,6 +48,9 @@ public class GlobalHandleExceptionTest {
 
     @MockitoBean
     private TaskGateway taskGateway;
+
+    @MockitoBean
+    private JwtAuthFilter jwtAuthFilter;
 
     private ApiRequest<CreateTaskRequest> wrap(CreateTaskRequest request) {
 

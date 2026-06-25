@@ -20,7 +20,7 @@ public class DobValidator
 
 
         if (value == null || value.isBlank()) {
-            return false;
+            return true;
         }
 
         try {
